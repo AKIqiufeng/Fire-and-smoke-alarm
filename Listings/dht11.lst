@@ -1,0 +1,129 @@
+C51 COMPILER V9.54   DHT11                                                                 01/29/2024 22:33:29 PAGE 1   
+
+
+C51 COMPILER V9.54, COMPILATION OF MODULE DHT11
+OBJECT MODULE PLACED IN .\Objects\dht11.obj
+COMPILER INVOKED BY: D:\software\keil5\C51\BIN\C51.EXE dht11.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\Listi
+                    -ngs\dht11.lst) TABS(2) OBJECT(.\Objects\dht11.obj)
+
+line level    source
+
+   1          #include  "dht11.h"
+   2          
+   3          u8 data_byte;   
+   4          u8 DHT_RH,DHT_RL,DHT_TH,DHT_TL; 
+   5          
+   6          
+   7          static void delay1()    //@11.0592MHz
+   8          {
+   9   1        unsigned char i;
+  10   1      
+  11   1        i = 2;
+  12   1        while (--i);
+  13   1      }
+  14          
+  15          static void delay(int xms)    //@11.0592MHz
+  16          {
+  17   1        unsigned char i, j;
+  18   1      
+  19   1        while(xms--)
+  20   1        {
+  21   2          _nop_();
+  22   2          i = 2;
+  23   2          j = 199;
+  24   2          do
+  25   2          {
+  26   3            while (--j);
+  27   3          } while (--i);
+  28   2        }
+  29   1      }
+  30          
+  31          //Եʼۯςʪ׈
+  32          void start()
+  33          {
+  34   1        dht_io = 1;
+  35   1        delay1();
+  36   1        dht_io = 0;
+  37   1        delay(25);
+  38   1        dht_io = 1;
+  39   1        delay1();
+  40   1        delay1();
+  41   1        delay1();
+  42   1      }
+  43          
+  44          u8 receive_byte()
+  45          {
+  46   1        u8 i,temp=0;
+  47   1        
+  48   1        for(i=0;i<8;i++)
+  49   1        {
+  50   2          while(!dht_io);
+  51   2          delay1();
+  52   2          delay1();
+  53   2          delay1();
+  54   2          //temp = 0;
+C51 COMPILER V9.54   DHT11                                                                 01/29/2024 22:33:29 PAGE 2   
+
+  55   2          if(dht_io == 1)
+  56   2          {
+  57   3            temp |= 1<<(7-i);
+  58   3            while(dht_io);
+  59   3          }
+  60   2        }
+  61   1        return temp;
+  62   1      }
+  63          
+  64          u8 receive(u16* temperature_h, u16* humidity_h)
+  65          {
+*** WARNING C235 IN LINE 65 OF dht11.c: parameter 1: different types
+*** WARNING C235 IN LINE 65 OF dht11.c: parameter 2: different types
+  66   1        unsigned int T_H,T_L,R_H,R_L,check,num_check,i=0;
+  67   1        
+  68   1        start();  
+  69   1        dht_io = 1;
+  70   1        
+  71   1        if(!dht_io)
+  72   1        {
+  73   2          while(!dht_io);
+  74   2          while(dht_io);
+  75   2          R_H=receive_byte();
+  76   2          R_L=receive_byte();
+  77   2          T_H=receive_byte();
+  78   2          T_L=receive_byte();
+  79   2          check=receive_byte();
+  80   2          dht_io = 0;
+  81   2          for(i=0;i<7;i++)
+  82   2            delay1();
+  83   2          dht_io = 1;
+  84   2          num_check=R_H+R_L+T_H+T_L;
+  85   2          if((num_check & 0xFF) == check)
+  86   2          {
+  87   3            DHT_RH=R_H;
+  88   3            DHT_RL=R_L;
+  89   3            DHT_TH=T_H;
+  90   3            DHT_TL=T_L;
+  91   3            *temperature_h = DHT_TH;
+  92   3            *humidity_h = DHT_RH;
+  93   3            check=num_check;
+  94   3            return 0;
+  95   3          }
+  96   2          else{
+  97   3            return 1;
+  98   3          }
+  99   2        }
+ 100   1      }
+*** WARNING C291 IN LINE 100 OF dht11.c: not every exit path returns a value
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    264    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =      5      16
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  3 WARNING(S),  0 ERROR(S)

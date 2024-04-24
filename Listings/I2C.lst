@@ -1,0 +1,193 @@
+C51 COMPILER V9.54   I2C                                                                   02/03/2024 21:52:10 PAGE 1   
+
+
+C51 COMPILER V9.54, COMPILATION OF MODULE I2C
+OBJECT MODULE PLACED IN .\Objects\I2C.obj
+COMPILER INVOKED BY: D:\software\keil5\C51\BIN\C51.EXE I2C.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\Listing
+                    -s\I2C.lst) TABS(2) OBJECT(.\Objects\I2C.obj)
+
+line level    source
+
+   1          
+   2          #include "I2C.h"
+   3          
+   4          /**
+   5           * @function: void Delay_5us()
+   6           * @description: 5us延时
+   7           * @param {void} 
+   8           * @return: void
+   9           */
+  10          static void Delay_5us()
+  11          {
+  12   1          _nop_();
+  13   1          _nop_();
+  14   1          _nop_();
+  15   1          _nop_();
+  16   1      }
+  17          
+  18          /**
+  19           * @function: void I2C_Start()
+  20           * @description: I2C开始信号
+  21           * @param {void} 
+  22           * @return: void
+  23           */
+  24          void I2C_Start()
+  25          {
+  26   1          I2C_SDA = 1;
+  27   1          I2C_SCL = 1;
+  28   1          Delay_5us();
+  29   1          I2C_SDA = 0;
+  30   1          Delay_5us();
+  31   1          I2C_SCL = 0;
+  32   1          Delay_5us();
+  33   1      }
+  34          
+  35          /**
+  36           * @function: void I2C_Stop()
+  37           * @description: I2C结束信号
+  38           * @param {void} 
+  39           * @return: void
+  40           */
+  41          void I2C_Stop()
+  42          {
+  43   1          I2C_SCL = 1;
+  44   1          I2C_SDA = 0;
+  45   1          Delay_5us();
+  46   1          I2C_SDA = 1;
+  47   1          Delay_5us();
+  48   1      }
+  49          
+  50          /**
+  51           * @function: void I2C_Wait_Ack()
+  52           * @description: I2C等待应答响应函数
+  53           * @param {void} 
+  54           * @return: return 1没有应答、return 0产生应答
+C51 COMPILER V9.54   I2C                                                                   02/03/2024 21:52:10 PAGE 2   
+
+  55           */
+  56          uint I2C_Wait_Ack()
+  57          {
+  58   1          uint count = 0;
+  59   1          I2C_SCL = 1;
+  60   1          Delay_5us();
+  61   1          while (I2C_SDA)
+  62   1          {
+  63   2              count++;
+  64   2              if (count > 250)
+  65   2              {
+  66   3                  I2C_Stop();
+  67   3                  return 1;
+  68   3              }
+  69   2          }
+  70   1          I2C_SCL = 0;
+  71   1          Delay_5us();
+  72   1          return 0;
+  73   1      }
+  74          
+  75          /**
+  76           * @function: void I2C_Ack()
+  77           * @description: 主机产生应答信号
+  78           * @param {void} 
+  79           * @return: void
+  80           */
+  81          #if 0
+              void I2C_Ack()
+              {
+                  I2C_SDA = 0;
+                  _nop_();
+                  I2C_SCL = 1;
+                  _nop_();
+                  I2C_SCL = 0;
+                  _nop_();
+                  I2C_SDA = 1;
+              }
+              #endif
+  93          
+  94          /**
+  95            * @brief  I2C产生不应答信号
+  96            * @param  无
+  97            * @retval 无
+  98            */
+  99          void I2C_NoAck()
+ 100          {
+ 101   1        I2C_SDA = 1;
+ 102   1        I2C_SCL = 1;
+ 103   1        I2C_SCL = 0;
+ 104   1      }
+ 105          
+ 106          /**
+ 107           * @function: void I2C_Write_Byte(uchar WData)
+ 108           * @description: I2C写数据函数
+ 109           * @param {uchar WData待写入的数据} 
+ 110           * @return: void
+ 111           */
+ 112          void I2C_Write_Byte(uchar WData)
+ 113          {
+ 114   1          uchar i;
+ 115   1          for (i = 0; i < 8; i++)
+ 116   1          {
+C51 COMPILER V9.54   I2C                                                                   02/03/2024 21:52:10 PAGE 3   
+
+ 117   2              I2C_SCL = 0;
+ 118   2              _nop_();
+ 119   2              _nop_();
+ 120   2              if (WData & 0x80) //先发送高字节数据，后发送低字节数据
+ 121   2                  I2C_SDA = 1;
+ 122   2              else
+ 123   2                  I2C_SDA = 0;
+ 124   2              _nop_();
+ 125   2              _nop_();
+ 126   2              I2C_SCL = 1; //数据写入总线
+ 127   2              _nop_();
+ 128   2              _nop_();
+ 129   2              I2C_SCL = 0;
+ 130   2              WData <<= 1; //准备写入下一位数据
+ 131   2          }
+ 132   1      }
+ 133          
+ 134          /**
+ 135           * @function: uchar I2C_Read_Byte()
+ 136           * @description: I2C读取数据函数
+ 137           * @param {void} 
+ 138           * @return: return RData读取的数据
+ 139           */
+ 140          #if 1
+ 141          uchar I2C_Read_Byte()
+ 142          {
+ 143   1          uchar i, RData = 0;
+ 144   1          I2C_SDA = 1; //释放数据总线
+ 145   1          _nop_();
+ 146   1          _nop_();
+ 147   1          for (i = 0; i < 8; i++)
+ 148   1          {
+ 149   2              RData <<= 1; //准备读取下一位数据
+ 150   2              I2C_SCL = 0;
+ 151   2              _nop_();
+ 152   2              I2C_SCL = 1; //可以开始读取数据
+ 153   2              _nop_();
+ 154   2              _nop_();
+ 155   2              if (I2C_SDA)
+ 156   2                  RData |= 0x01; //1写入RData此刻的最低位
+ 157   2              else
+ 158   2                  RData &= 0xfe; //0写入RData此刻的最低位
+ 159   2          }
+ 160   1          I2C_SCL = 0;
+ 161   1          _nop_();
+ 162   1          _nop_();
+ 163   1          return RData;
+ 164   1      }
+ 165          #endif
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    154    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

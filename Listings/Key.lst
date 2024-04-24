@@ -1,0 +1,90 @@
+C51 COMPILER V9.54   KEY                                                                   01/29/2024 21:37:08 PAGE 1   
+
+
+C51 COMPILER V9.54, COMPILATION OF MODULE KEY
+OBJECT MODULE PLACED IN .\Objects\Key.obj
+COMPILER INVOKED BY: D:\software\keil5\C51\BIN\C51.EXE Key.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\Listing
+                    -s\Key.lst) TABS(2) OBJECT(.\Objects\Key.obj)
+
+line level    source
+
+   1          #include <reg52.h>
+   2          
+   3          sbit Key1 = P3^1;
+   4          sbit Key2 = P3^0;
+   5          sbit Key3 = P3^2;
+   6          sbit Key4 = P3^3;
+   7          
+   8          unsigned char Key_KeyNum;
+   9          
+  10          /**
+  11            * @brief  独立按键检测
+  12            * @param  无
+  13            * @retval 返回按下的独立按键键码，下降沿检测
+  14            */
+  15          unsigned char Key()
+  16          {
+  17   1        unsigned char temp=0;
+  18   1        temp = Key_KeyNum;
+  19   1        Key_KeyNum = 0;
+  20   1        return temp;
+  21   1      }
+  22          
+  23          /**
+  24            * @brief  检测独立按键状态
+  25            * @param  无
+  26            * @retval 返回独立按键此时状态
+  27            */
+  28          unsigned char Key_GetState()
+  29          {
+  30   1        unsigned char KeyState=0;
+  31   1        if(Key1==0) {KeyState=1;}
+  32   1        if(Key2==0) {KeyState=2;}
+  33   1        if(Key3==0) {KeyState=3;}
+  34   1        if(Key4==0) {KeyState=4;}
+  35   1        return KeyState;
+  36   1      }
+  37          
+  38          /**
+  39            * @brief  计时器扫描按键状态循环，使用时放入计时器中断函数，参考时间20ms
+  40            * @param  无
+  41            * @retval 无
+  42            */
+  43          void Key_Loop()
+  44          {
+  45   1        static unsigned char NowState,LastState;
+  46   1        LastState = NowState;
+  47   1        NowState = Key_GetState();
+  48   1        if(LastState == 1 && NowState == 0)
+  49   1        {
+  50   2          Key_KeyNum = 1;
+  51   2        }
+  52   1        if(LastState == 2 && NowState == 0)
+  53   1        {
+  54   2          Key_KeyNum = 2;
+C51 COMPILER V9.54   KEY                                                                   01/29/2024 21:37:08 PAGE 2   
+
+  55   2        }
+  56   1        if(LastState == 3 && NowState == 0)
+  57   1        {
+  58   2          Key_KeyNum = 3;
+  59   2        }
+  60   1        if(LastState == 4 && NowState == 0)
+  61   1        {
+  62   2          Key_KeyNum = 4;
+  63   2        }
+  64   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =     85    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =      3    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

@@ -1,0 +1,74 @@
+C51 COMPILER V9.54   TIMER1                                                                02/02/2024 15:35:54 PAGE 1   
+
+
+C51 COMPILER V9.54, COMPILATION OF MODULE TIMER1
+OBJECT MODULE PLACED IN .\Objects\Timer1.obj
+COMPILER INVOKED BY: D:\software\keil5\C51\BIN\C51.EXE Timer1.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\List
+                    -ings\Timer1.lst) TABS(2) OBJECT(.\Objects\Timer1.obj)
+
+line level    source
+
+   1          #include <reg52.h>
+   2          
+   3          /**
+   4            * @brief  定时器1初始化
+   5            * @param  无
+   6            * @retval 无
+   7            */
+   8          void Timer1_Init(void)    //1毫秒@11.0592MHz
+   9          {
+  10   1        //AUXR &= 0xBF;     //定时器时钟12T模式
+  11   1        TMOD &= 0x0F;     //设置定时器模式
+  12   1        TMOD |= 0x10;     //设置定时器模式
+  13   1        TL1 = 0;        //设置定时初始值
+  14   1        TH1 = 0;        //设置定时初始值
+  15   1        TF1 = 0;        //清除TF0标志
+  16   1        TR1 = 0;        //定时器1停止计时
+  17   1      }
+  18          
+  19          /**
+  20            * @brief  定时器1设置计数器值
+  21            * @param  Value，要设置的计数器值，范围：0~65535
+  22            * @retval 无
+  23            */
+  24          void Timer1_SetCounter(unsigned int Value)
+  25          {
+  26   1        TH1 = Value/256;
+  27   1        TL1 = Value%256;
+  28   1      }
+  29          
+  30          /**
+  31            * @brief  定时器1获取计数器值
+  32            * @param  无
+  33            * @retval 计数器值，范围：0~65535
+  34            */
+  35          unsigned int Timer1_GetCounter(void)
+  36          {
+  37   1        return (TH1<<8)|TL1;
+  38   1      }
+  39          
+  40          /**
+  41            * @brief  定时器1启动停止控制
+  42            * @param  Flag 启动停止标志，1为启动，0为停止
+  43            * @retval 无
+  44            */
+  45          void Timer1_Run(unsigned char Flag)
+  46          {
+  47   1        TR1 = Flag;
+  48   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =     42    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+C51 COMPILER V9.54   TIMER1                                                                02/02/2024 15:35:54 PAGE 2   
+
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)
